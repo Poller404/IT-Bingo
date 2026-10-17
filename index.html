@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap">
 <style>
-/* Layout: one calm column — title, board settings, 5×5 grid, quiet secondary actions. */
+/* Layout: one calm column — title, board settings, 4×4 grid, quiet secondary actions. */
 :root {
   --bg: #f6f7f6;
   --surface: #ffffff;
@@ -69,7 +69,7 @@ h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-
 .status { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
 .status b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
-.grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
 .cell {
   position: relative; aspect-ratio: 1; max-width: 100%;
   border-radius: 10px; border: 1px dashed var(--line); background: transparent;
@@ -173,7 +173,7 @@ h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-
 
   <section class="board" aria-label="Bingo-Raster">
     <div class="status">
-      <span><b id="said">0</b> gesagt · <b id="lines">0</b> von 12 Reihen</span>
+      <span><b id="said">0</b> gesagt · <b id="lines">0</b> von 10 Reihen</span>
       <span>Leeres Feld: eintragen · Volles Feld: abhaken</span>
     </div>
     <div class="grid" id="grid" role="grid"></div>
@@ -214,14 +214,15 @@ h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-
 </script>
 <script>
 (() => {
-  const SIZE = 5, CENTER = 12;
+  const SIZE = 4, CENTER = -1; // 4×4 hat keine Mitte, also kein Freifeld
   const FREE_TEXT = "Frei";
   const TOP_LIMIT = 24;
   let topTerms = []; // [{term, uses}] — meistgenutzte Begriffe dieses Boards
   const LINES = [];
-  for (let r = 0; r < SIZE; r++) LINES.push([0,1,2,3,4].map(c => r * SIZE + c));
-  for (let c = 0; c < SIZE; c++) LINES.push([0,1,2,3,4].map(r => r * SIZE + c));
-  LINES.push([0,6,12,18,24], [4,8,12,16,20]);
+  const RANGE = [...Array(SIZE).keys()];
+  for (let r = 0; r < SIZE; r++) LINES.push(RANGE.map(c => r * SIZE + c));
+  for (let c = 0; c < SIZE; c++) LINES.push(RANGE.map(r => r * SIZE + c));
+  LINES.push(RANGE.map(k => k * SIZE + k), RANGE.map(k => k * SIZE + SIZE - 1 - k));
 
   const $ = id => document.getElementById(id);
   const grid = $("grid"), chips = $("chips");
@@ -388,7 +389,7 @@ h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-
   });
 
   // ---------- quick picks ----------
-  function emptyCells() { const out = []; for (let i = 0; i < 25; i++) if (i !== CENTER && !(state.get(i) || {}).text) out.push(i); return out; }
+  function emptyCells() { const out = []; for (let i = 0; i < SIZE * SIZE; i++) if (i !== CENTER && !(state.get(i) || {}).text) out.push(i); return out; }
   chips.addEventListener("click", e => {
     const b = e.target.closest(".chip"); if (!b || b.classList.contains("used")) return;
     const free = emptyCells();
@@ -444,7 +445,7 @@ h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-
   function applyRow(r) {
     if (!r || r.board !== board) return;
     const i = r.cell;
-    if (!Number.isInteger(i) || i < 0 || i > 24 || i === CENTER) return;
+    if (!Number.isInteger(i) || i < 0 || i >= SIZE * SIZE || i === CENTER) return;
     state.set(i, { text: String(r.text).slice(0, 60), done: !!r.done, by: r.added_by || null });
   }
   async function connect() {

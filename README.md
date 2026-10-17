@@ -1,6 +1,6 @@
 # IT-Bingo
 
-Gemeinsames Bingo für die IT. Alle tragen Begriffe ins 5×5-Raster ein; fällt einer im Meeting, wird er abgehakt.
+Gemeinsames Bingo für die IT. Alle tragen Begriffe ins 4×4-Raster ein; fällt einer im Meeting, wird er abgehakt.
 
 - Statische Seite (`index.html`) für GitHub Pages
 - Live-Sync über Supabase (Realtime)
@@ -13,7 +13,7 @@ Gemeinsames Bingo für die IT. Alle tragen Begriffe ins 5×5-Raster ein; fällt 
 -- Aktuelles Raster
 create table public.bingo_cells (
   board text not null check (board ~ '^[a-z0-9_-]{1,40}$'),
-  cell smallint not null check (cell between 0 and 24 and cell <> 12),
+  cell smallint not null check (cell between 0 and 15),
   text text not null check (char_length(text) between 1 and 60),
   done boolean not null default false,
   added_by text check (added_by is null or char_length(added_by) <= 30),
