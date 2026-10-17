@@ -3,43 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Synergie-Bingo 3000</title>
-<meta name="description" content="Gemeinsames Buzzword-Bingo für Meetings. Kein Wettbewerb, nur gelebte Teamkultur.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%232346d8'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23ffe14d' font-family='Georgia' font-weight='bold'%3EB%3C/text%3E%3C/svg%3E">
+<title>Meeting-Bingo</title>
+<meta name="description" content="Gemeinsames Bingo für Meetings: Begriffe eintragen, abhaken, wenn sie fallen.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23156f63'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap">
 <style>
-/* Layout: a flipchart sheet — cringe headline on top, 5×5 Post-it grid in the middle, buzzword quick-picks underneath. */
+/* Layout: one calm column — title, board settings, 5×5 grid, quiet secondary actions. */
 :root {
-  --bg: #eef1f7;
-  --sheet: #ffffff;
-  --ink: #1b2238;
-  --muted: #5d6680;
-  --line: #d5dbe8;
-  --corp: #2346d8;          /* PowerPoint-Blau */
-  --corp-ink: #ffffff;
-  --note: #fff7c2;          /* Post-it */
-  --note-edge: #eadf8f;
-  --marker: #ff3d7f;        /* Textmarker-Stempel */
-  --marker-soft: rgba(255, 61, 127, .14);
-  --win: #ffe14d;
-  --font-display: "Shrikhand", "Cooper Black", Georgia, serif;
-  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  --bg: #f6f7f6;
+  --surface: #ffffff;
+  --ink: #18201e;
+  --muted: #66706d;
+  --line: #e1e5e3;
+  --accent: #156f63;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3f1ee;
+  --danger: #b4372c;
+  --font: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Geist Mono", ui-monospace, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #12162a; --sheet: #1b2038; --ink: #eef0fa; --muted: #a2a9c4; --line: #2e3554;
-    --corp: #7d95ff; --corp-ink: #0d1127; --note: #3a3620; --note-edge: #575027;
-    --marker: #ff6f9e; --marker-soft: rgba(255, 111, 158, .18); --win: #e8c933;
+    --bg: #111514; --surface: #181d1c; --ink: #e8eceb; --muted: #97a19e; --line: #2a3230;
+    --accent: #4fc2b0; --accent-ink: #0b1513; --accent-soft: #1b3330; --danger: #ef7a6f;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #12162a; --sheet: #1b2038; --ink: #eef0fa; --muted: #a2a9c4; --line: #2e3554;
-  --corp: #7d95ff; --corp-ink: #0d1127; --note: #3a3620; --note-edge: #575027;
-  --marker: #ff6f9e; --marker-soft: rgba(255, 111, 158, .18); --win: #e8c933;
+  --bg: #111514; --surface: #181d1c; --ink: #e8eceb; --muted: #97a19e; --line: #2a3230;
+  --accent: #4fc2b0; --accent-ink: #0b1513; --accent-soft: #1b3330; --danger: #ef7a6f;
   color-scheme: dark;
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -47,211 +41,165 @@
 html, body { background: var(--bg); color: var(--ink); }
 body {
   margin: 0;
-  font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  font-family: var(--font); font-size: 15px; line-height: 1.5;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 24px 48px;
+  padding-block: 40px 56px;
 }
-.wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+.wrap { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
 
-header { display: flex; flex-direction: column; gap: 8px; }
-.eyebrow {
-  font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
-}
-.eyebrow .live { display: inline-flex; align-items: center; gap: 6px; }
-.eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
-.eyebrow .live.on .dot { background: #2fbf71; box-shadow: 0 0 0 3px rgba(47,191,113,.2); }
-h1 {
-  font-family: var(--font-display); font-weight: 400; margin: 0;
-  font-size: clamp(34px, 7vw, 58px); line-height: 1.02; text-wrap: balance;
-  color: var(--corp);
-}
-h1 .tm { font-family: var(--font-body); font-size: .32em; vertical-align: super; font-weight: 800; }
-h1 .hl { color: var(--ink); background: linear-gradient(transparent 55%, var(--win) 55%, var(--win) 90%, transparent 90%); padding: 0 .08em; }
-.claim { margin: 0; color: var(--muted); max-width: 60ch; font-size: 16px; }
-.claim b { color: var(--ink); }
+header { display: flex; flex-direction: column; gap: 6px; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-height: 1.15; }
+.claim { margin: 0; color: var(--muted); max-width: 60ch; }
+.live { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
+.live .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+.live.on .dot { background: var(--accent); }
 
-.board-card {
-  background: var(--sheet); border: 1px solid var(--line); border-radius: 6px;
-  padding: clamp(10px, 2.5vw, 20px);
-  box-shadow: 0 1px 0 var(--line), 0 18px 40px -28px rgba(20, 30, 70, .45);
-  display: flex; flex-direction: column; gap: 14px;
+.who { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; flex: 1 1 160px; }
+.field label { font-size: 12px; font-weight: 500; color: var(--muted); }
+.field input {
+  font: 400 14px/1.2 var(--font); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 9px 11px; width: 100%;
 }
-.status { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-.score { font-weight: 800; font-size: 15px; }
-.score .n { font-variant-numeric: tabular-nums; color: var(--marker); }
-.hint { font-size: 13px; color: var(--muted); }
+.field input:focus-visible { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
 
-.grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(5px, 1.4vw, 10px); }
+.board { display: flex; flex-direction: column; gap: 12px; }
+.status { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.status b { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; }
 .cell {
   position: relative; aspect-ratio: 1; max-width: 100%;
-  border-radius: 4px; border: 1.5px dashed var(--line); background: transparent;
+  border-radius: 10px; border: 1px dashed var(--line); background: transparent;
   display: flex; align-items: center; justify-content: center; text-align: center;
   padding: 6px; cursor: pointer; color: var(--muted);
-  font: 600 clamp(10px, 2.3vw, 14px)/1.2 var(--font-body);
-  transition: transform .12s ease, background .12s ease;
+  font: 500 clamp(10px, 2.2vw, 14px)/1.25 var(--font);
+  transition: background .15s ease, border-color .15s ease, color .15s ease;
   overflow: hidden;
 }
-.cell:hover { border-color: var(--corp); color: var(--corp); }
-.cell:focus-visible { outline: 3px solid var(--corp); outline-offset: 2px; }
-.cell .plus { font-size: 1.6em; font-weight: 400; line-height: 1; }
-.cell.filled {
-  border: 1px solid var(--note-edge); background: var(--note); color: var(--ink);
-  box-shadow: 0 2px 0 var(--note-edge);
-}
-.cell.filled:hover { transform: rotate(-1.2deg) translateY(-1px); }
+.cell:hover { border-color: var(--accent); color: var(--accent); }
+.cell:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.cell .plus { font-size: 1.4em; font-weight: 400; line-height: 1; }
+.cell.filled { border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+.cell.filled:hover { border-color: var(--accent); }
 .cell .txt { overflow-wrap: anywhere; hyphens: auto; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
 .cell .by {
-  position: absolute; left: 4px; right: 4px; bottom: 3px;
-  font: 500 clamp(8px, 1.5vw, 10px)/1.1 var(--font-mono); color: var(--muted);
+  position: absolute; left: 6px; right: 6px; bottom: 4px;
+  font: 400 clamp(8px, 1.4vw, 10px)/1.1 var(--mono); color: var(--muted);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.cell .tools { position: absolute; top: 2px; right: 2px; display: flex; gap: 2px; opacity: 0; transition: opacity .12s; }
+.cell .tools { position: absolute; top: 3px; right: 3px; display: flex; gap: 2px; opacity: 0; transition: opacity .12s; }
 .cell:hover .tools, .cell:focus-within .tools { opacity: 1; }
-@media (hover: none) { .cell .tools { opacity: .75; } }
+@media (hover: none) { .cell .tools { opacity: .7; } }
 .tool {
-  width: 20px; height: 20px; border-radius: 3px; border: 0; padding: 0; cursor: pointer;
-  background: var(--sheet); color: var(--ink); font: 600 12px/20px var(--font-body);
-  box-shadow: 0 0 0 1px var(--line);
+  width: 20px; height: 20px; border-radius: 5px; border: 0; padding: 0; cursor: pointer;
+  background: var(--bg); color: var(--muted); font: 500 12px/20px var(--font);
 }
-.tool:hover { background: var(--corp); color: var(--corp-ink); }
-.tool:focus-visible { outline: 2px solid var(--corp); }
+.tool:hover { background: var(--line); color: var(--ink); }
+.tool:focus-visible { outline: 2px solid var(--accent); }
 
-.cell.done .txt { text-decoration: line-through; text-decoration-color: var(--marker); text-decoration-thickness: 2px; }
-.cell.done::after {
-  content: "GESAGT"; position: absolute; inset: auto; top: 50%; left: 50%;
-  transform: translate(-50%, -50%) rotate(-14deg);
-  font: 400 clamp(11px, 2.6vw, 17px)/1 var(--font-display); letter-spacing: .02em;
-  color: var(--marker); border: 2px solid var(--marker); border-radius: 4px;
-  padding: 3px 6px; background: var(--marker-soft); pointer-events: none;
-  animation: stamp .22s ease-out;
+.cell.done { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.cell.done:hover { border-color: var(--accent); }
+.cell.done .by { color: var(--accent-ink); opacity: .75; }
+.cell.done .tool { background: transparent; color: var(--accent-ink); }
+.cell.done::before {
+  content: ""; position: absolute; top: 7px; left: 7px; width: 9px; height: 5px;
+  border-left: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg);
 }
-@keyframes stamp { from { transform: translate(-50%, -50%) rotate(-14deg) scale(1.8); opacity: 0; } }
-.cell.inline { outline: 3px solid var(--win); outline-offset: -1px; }
-.cell.free { cursor: default; background: var(--corp); border-color: var(--corp); color: var(--corp-ink); box-shadow: none; }
-.cell.free:hover { transform: none; }
-.cell.free .txt { text-decoration: none; }
-.cell.free::after { content: none; }
-.cell.free .by { color: var(--corp-ink); opacity: .8; }
+.cell.inline { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+.cell.free { cursor: default; background: var(--accent-soft); border-color: transparent; color: var(--accent); }
+.cell.free::before { content: none; }
+.cell.free .by { color: var(--accent); }
 
 .cell textarea {
-  position: absolute; inset: 0; width: 100%; height: 100%; resize: none; border: 2px solid var(--corp);
-  border-radius: 4px; background: var(--sheet); color: var(--ink); padding: 6px;
-  font: 600 clamp(10px, 2.3vw, 14px)/1.2 var(--font-body); text-align: center;
+  position: absolute; inset: 0; width: 100%; height: 100%; resize: none; border: 2px solid var(--accent);
+  border-radius: 10px; background: var(--surface); color: var(--ink); padding: 6px;
+  font: 500 clamp(10px, 2.2vw, 14px)/1.25 var(--font); text-align: center;
 }
 .cell textarea:focus { outline: none; }
 
-.picks { display: flex; flex-direction: column; gap: 10px; }
-.picks h2, .actions h2 {
-  margin: 0; font: 500 12px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
-}
+.section { display: flex; flex-direction: column; gap: 10px; }
+.section h2 { margin: 0; font-size: 13px; font-weight: 500; color: var(--muted); }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip {
-  border: 1px solid var(--line); background: var(--sheet); color: var(--ink); cursor: pointer;
-  border-radius: 999px; padding: 5px 11px; font: 600 13px/1.2 var(--font-body);
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink); cursor: pointer;
+  border-radius: 999px; padding: 4px 11px; font: 400 13px/1.3 var(--font);
 }
-.chip:hover { border-color: var(--corp); color: var(--corp); }
-.chip:focus-visible { outline: 2px solid var(--corp); outline-offset: 1px; }
-.chip.used { opacity: .4; text-decoration: line-through; }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.chip.used { opacity: .4; }
+.chip .uses { margin-left: 6px; color: var(--muted); font: 400 11px/1 var(--mono); font-variant-numeric: tabular-nums; }
 
-.actions { display: flex; flex-direction: column; gap: 10px; }
-.btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btns, .confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.confirm { font-size: 14px; }
 .btn {
-  border: 0; border-radius: 4px; padding: 9px 14px; cursor: pointer;
-  font: 800 14px/1 var(--font-body); background: var(--corp); color: var(--corp-ink);
+  border: 1px solid transparent; border-radius: 8px; padding: 8px 13px; cursor: pointer;
+  font: 500 14px/1.1 var(--font); background: var(--accent); color: var(--accent-ink);
 }
-.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
-.btn.ghost:hover { box-shadow: inset 0 0 0 1.5px var(--corp); color: var(--corp); }
-.btn.danger { background: var(--marker); color: #fff; }
-.btn:focus-visible { outline: 3px solid var(--win); outline-offset: 2px; }
-.confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; }
+.btn.ghost { background: var(--surface); color: var(--ink); border-color: var(--line); }
+.btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+.btn.danger { background: var(--danger); color: #fff; }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.notice { font-size: 13px; color: var(--muted); border-left: 3px solid var(--win); padding: 4px 10px; }
+.notice { margin: 0; font-size: 13px; color: var(--muted); }
 
-.toast {
-  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
-  transform: translateX(-50%) translateY(140%); transition: transform .3s cubic-bezier(.2,1.4,.4,1);
-  background: var(--win); color: #1b2238; border-radius: 6px; padding: 12px 18px;
-  font: 400 clamp(18px, 4vw, 24px)/1.15 var(--font-display); text-align: center;
-  max-width: calc(100vw - 32px); box-shadow: 0 10px 30px -10px rgba(0,0,0,.4); z-index: 5;
-}
-.toast small { display: block; font: 600 13px/1.3 var(--font-body); margin-top: 4px; }
-.toast.show { transform: translateX(-50%) translateY(0); }
-canvas#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
-
-.who { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: end; }
-.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.field label { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
-.field input {
-  font: 600 14px/1.2 var(--font-body); color: var(--ink); background: var(--sheet);
-  border: 1.5px solid var(--line); border-radius: 4px; padding: 7px 10px; width: 14em; max-width: 100%;
-}
-.field input:focus-visible { outline: none; border-color: var(--corp); }
-.who .btn { padding: 8px 12px; }
-footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
-@media (prefers-reduced-motion: reduce) {
-  .cell, .toast { transition: none; }
-  .cell.done::after { animation: none; }
-}
+@media (prefers-reduced-motion: reduce) { .cell { transition: none; } }
 </style>
 </head>
 <body>
-<canvas id="confetti" aria-hidden="true"></canvas>
 <div class="wrap">
   <header>
-    <div class="eyebrow">
-      <span>Agenda-Punkt 7b · Teambuilding</span>
+    <div class="top">
+      <h1>Meeting-Bingo</h1>
       <span class="live" id="live"><span class="dot"></span><span id="liveText">verbinde …</span></span>
     </div>
-    <h1>Synergie-Bingo 3000<span class="tm">™</span><br>Lass uns das mal <span class="hl">kurz abholen</span>!</h1>
-    <p class="claim">Kein Wettbewerb, nur <b>gelebte Teamkultur</b>. Alle tragen Buzzwords ins Raster ein. Fällt eins im Meeting, wird's abgehakt. Volle Reihe = gemeinsamer Win-Win-Moment.</p>
+    <p class="claim">Alle tragen Begriffe ins Raster ein. Fällt einer im Meeting, wird er abgehakt.</p>
   </header>
 
   <form class="who" id="whoForm" autocomplete="off">
     <div class="field">
-      <label for="myName">Dein Name</label>
-      <input id="myName" maxlength="30" placeholder="z. B. Kim aus dem Controlling">
+      <label for="myName">Dein Name (optional)</label>
+      <input id="myName" maxlength="30" placeholder="Kim">
     </div>
     <div class="field">
-      <label for="boardName">Board (für dein Team)</label>
+      <label for="boardName">Board</label>
       <input id="boardName" maxlength="40" placeholder="weekly">
     </div>
-    <button class="btn ghost" type="submit">Board wechseln</button>
+    <button class="btn ghost" type="submit">Öffnen</button>
     <button class="btn ghost" type="button" id="copyLink">Link kopieren</button>
   </form>
 
-  <section class="board-card" aria-label="Bingo-Raster">
+  <section class="board" aria-label="Bingo-Raster">
     <div class="status">
-      <div class="score"><span class="n" id="lines">0</span> von 12 Reihen gemeinsam abgeholt · <span class="n" id="said">0</span> Begriffe gesagt</div>
-      <div class="hint">Leeres Feld antippen = eintragen · Volles Feld antippen = abhaken</div>
+      <span><b id="said">0</b> gesagt · <b id="lines">0</b> von 12 Reihen</span>
+      <span>Leeres Feld: eintragen · Volles Feld: abhaken</span>
     </div>
     <div class="grid" id="grid" role="grid"></div>
   </section>
 
-  <section class="picks">
-    <h2>Fehlt dir Inspiration? Ein Klick füllt das nächste freie Feld</h2>
+  <section class="section">
+    <h2>Häufig genutzt – Klick füllt das nächste freie Feld</h2>
     <div class="chips" id="chips"></div>
+    <p class="notice" id="chipsEmpty">Noch leer. Hier erscheinen eure meistgenutzten Begriffe.</p>
   </section>
 
-  <section class="actions">
-    <h2>Neues Meeting, neues Glück</h2>
+  <section class="section">
+    <h2>Board</h2>
     <div class="btns" id="actionBtns">
-      <button class="btn" id="randomFill" type="button">Restliche Felder zufällig füllen</button>
+      <button class="btn ghost" id="randomFill" type="button">Rest zufällig füllen</button>
       <button class="btn ghost" id="resetChecks" type="button">Häkchen zurücksetzen</button>
       <button class="btn ghost" id="clearAll" type="button">Raster leeren</button>
     </div>
     <div class="confirm" id="confirm" hidden>
       <span id="confirmText"></span>
-      <button class="btn danger" id="confirmYes" type="button">Ja, machen</button>
-      <button class="btn ghost" id="confirmNo" type="button">Doch nicht</button>
+      <button class="btn danger" id="confirmYes" type="button">Bestätigen</button>
+      <button class="btn ghost" id="confirmNo" type="button">Abbrechen</button>
     </div>
     <p class="notice" id="notice" hidden></p>
   </section>
-
-  <footer>Mitte ist Freifeld, weil's sowieso jedes Mal passiert.</footer>
 </div>
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
 <script>
@@ -259,22 +207,17 @@ footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
   window.BINGO_CONFIG = {
     url: "https://kxrnwdzxypfepnaafdfn.supabase.co",
     key: "sb_publishable_MnMq0DnmXk35gplnmPMhYA_7UJ1YE-8",
-    table: "bingo_cells"
+    table: "bingo_cells",
+    usesTable: "bingo_term_uses",
+    topView: "bingo_top_terms"
   };
 </script>
 <script>
 (() => {
   const SIZE = 5, CENTER = 12;
-  const FREE_TEXT = "„Du bist noch gemutet“";
-  const BUZZ = [
-    "Synergie", "Kurz abholen", "Low hanging fruit", "Können wir das offline klären?",
-    "Am Ende des Tages", "Win-Win", "Proaktiv", "Deep Dive", "Pain Point", "Agil",
-    "Keine Bandbreite", "Learnings", "Quick Win", "Auf Augenhöhe", "ASAP", "Touchpoint",
-    "Mindset", "Commitment", "Roadmap", "Stakeholder", "KPI", "Seht ihr meinen Bildschirm?",
-    "Das nehmen wir mit", "Lass uns da nochmal drüber sprechen", "Out of the box",
-    "Ich teile kurz", "Spannend!", "Hands-on", "Game Changer", "Ownership", "Big Picture",
-    "Sorry, du warst kurz eingefroren", "Ich muss gleich in den nächsten Call", "Zeitlich knapp"
-  ];
+  const FREE_TEXT = "Frei";
+  const TOP_LIMIT = 24;
+  let topTerms = []; // [{term, uses}] — meistgenutzte Begriffe dieses Boards
   const LINES = [];
   for (let r = 0; r < SIZE; r++) LINES.push([0,1,2,3,4].map(c => r * SIZE + c));
   for (let c = 0; c < SIZE; c++) LINES.push([0,1,2,3,4].map(r => r * SIZE + c));
@@ -301,6 +244,8 @@ footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
 
   // ---------- writes (Supabase or local fallback) ----------
   async function writeCell(i, data) {
+    const prev = state.get(i);
+    const isNewTerm = data !== null && (!prev || prev.text !== data.text);
     if (data === null) state.delete(i); else state.set(i, data);
     render();
     if (!sb) return;
@@ -308,7 +253,31 @@ footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
     const { error } = data === null
       ? await q.delete().eq("board", board).eq("cell", i)
       : await q.upsert({ board, cell: i, text: data.text, done: data.done, added_by: data.by, updated_at: new Date().toISOString() });
-    if (error) showNotice("Speichern hat nicht geklappt (" + error.message + "). Bitte nochmal versuchen.");
+    if (error) { showNotice("Speichern hat nicht geklappt (" + error.message + "). Bitte nochmal versuchen."); return; }
+    if (isNewTerm) await sb.from(CFG.usesTable).insert({ board, term: data.text });
+  }
+
+  // ---------- meistgenutzte Begriffe ----------
+  let topTimer;
+  async function loadTopTerms() {
+    if (!sb) return renderChips();
+    const { data, error } = await sb.from(CFG.topView).select("term, uses")
+      .eq("board", board).order("uses", { ascending: false }).order("last_used", { ascending: false }).limit(TOP_LIMIT);
+    if (!error) topTerms = data;
+    renderChips();
+  }
+  const refreshTopTerms = () => { clearTimeout(topTimer); topTimer = setTimeout(loadTopTerms, 800); };
+  function renderChips() {
+    chips.replaceChildren();
+    $("chipsEmpty").hidden = topTerms.length > 0;
+    topTerms.forEach(({ term, uses }) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.dataset.term = term;
+      b.append(term);
+      const n = document.createElement("span"); n.className = "uses"; n.textContent = uses + "×"; b.append(n);
+      b.title = uses + "× eingetragen";
+      chips.append(b);
+    });
+    render();
   }
 
   // ---------- render ----------
@@ -330,7 +299,6 @@ footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
         el.tabIndex = -1;
         if (inLine.has(i)) el.classList.add("inline");
         const t = document.createElement("span"); t.className = "txt"; t.textContent = FREE_TEXT; el.append(t);
-        const b = document.createElement("span"); b.className = "by"; b.textContent = "Freifeld"; el.append(b);
         el.setAttribute("aria-label", "Freifeld: " + FREE_TEXT);
         continue;
       }
@@ -355,9 +323,8 @@ footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
     $("lines").textContent = done.length;
     $("said").textContent = said;
     const used = new Set([...state.values()].map(v => (v.text || "").toLowerCase()));
-    [...chips.children].forEach(c => c.classList.toggle("used", used.has(c.textContent.toLowerCase())));
+    [...chips.children].forEach(c => c.classList.toggle("used", used.has(c.dataset.term.toLowerCase())));
 
-    if (lastLines !== null && done.length > lastLines) celebrate(done.length);
     lastLines = done.length;
   }
 
@@ -421,21 +388,18 @@ footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
   });
 
   // ---------- quick picks ----------
-  BUZZ.forEach(w => {
-    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = w;
-    chips.append(b);
-  });
   function emptyCells() { const out = []; for (let i = 0; i < 25; i++) if (i !== CENTER && !(state.get(i) || {}).text) out.push(i); return out; }
   chips.addEventListener("click", e => {
     const b = e.target.closest(".chip"); if (!b || b.classList.contains("used")) return;
     const free = emptyCells();
-    if (!free.length) { showNotice("Das Raster ist voll. Erst ein Feld leeren (×), dann klappt's."); return; }
-    writeCell(free[0], { text: b.textContent, done: false, by: myName() });
+    if (!free.length) { showNotice("Das Raster ist voll. Leere zuerst ein Feld (×)."); return; }
+    writeCell(free[0], { text: b.dataset.term, done: false, by: myName() });
   });
   $("randomFill").addEventListener("click", async () => {
     const free = emptyCells();
     const used = new Set([...state.values()].map(v => (v.text || "").toLowerCase()));
-    const pool = BUZZ.filter(w => !used.has(w.toLowerCase())).sort(() => Math.random() - .5);
+    const pool = topTerms.map(t => t.term).filter(w => !used.has(w.toLowerCase())).sort(() => Math.random() - .5);
+    if (!pool.length) { showNotice("Noch keine freien Vorschläge. Die Liste wächst mit euren Einträgen."); return; }
     for (const i of free) { const w = pool.pop(); if (!w) break; await writeCell(i, { text: w, done: false, by: myName() }); }
   });
 
@@ -456,40 +420,6 @@ footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
   }));
 
   // ---------- celebration ----------
-  const PHRASES = [
-    ["BINGO!", "Wir haben die Reihe gemeinsam abgeholt."],
-    ["BINGO!", "Das ist gelebte Synergie, Leute."],
-    ["BINGO!", "Great Teamwork. Ich nehme das mal als Learning mit."],
-    ["BINGO!", "Low hanging fruit: gepflückt."]
-  ];
-  let toastTimer;
-  function celebrate(n) {
-    const [a, b] = PHRASES[(n - 1) % PHRASES.length];
-    const t = $("toast"); t.replaceChildren(document.createTextNode(a + (n > 1 ? " ×" + n : "")));
-    const s = document.createElement("small"); s.textContent = b; t.append(s);
-    t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
-    confetti();
-  }
-  function confetti() {
-    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const cv = $("confetti"), ctx = cv.getContext("2d");
-    const dpr = window.devicePixelRatio || 1;
-    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.scale(dpr, dpr);
-    const cs = getComputedStyle(document.documentElement);
-    const cols = ["--corp", "--marker", "--win", "--note"].map(v => cs.getPropertyValue(v).trim());
-    const ps = Array.from({ length: 140 }, () => ({
-      x: innerWidth / 2 + (Math.random() - .5) * 120, y: innerHeight * .55,
-      vx: (Math.random() - .5) * 14, vy: -Math.random() * 15 - 6, r: Math.random() * 6.28,
-      vr: (Math.random() - .5) * .4, w: 6 + Math.random() * 6, h: 4 + Math.random() * 4, c: cols[Math.random() * 4 | 0]
-    }));
-    let f = 0;
-    (function tick() {
-      ctx.clearRect(0, 0, innerWidth, innerHeight);
-      ps.forEach(p => { p.vy += .45; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.r += p.vr;
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore(); });
-      if (++f < 150) requestAnimationFrame(tick); else ctx.clearRect(0, 0, innerWidth, innerHeight);
-    })();
-  }
 
   function showNotice(msg) { const n = $("notice"); n.textContent = msg; n.hidden = false; }
   function setLive(on, text) { $("live").classList.toggle("on", on); $("liveText").textContent = text; }
@@ -519,8 +449,9 @@ footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
   }
   async function connect() {
     $("boardName").value = board;
-    document.title = "Synergie-Bingo 3000 · " + board;
-    state.clear(); lastLines = null; render();
+    document.title = "Meeting-Bingo · " + board;
+    state.clear(); topTerms = []; lastLines = null; render();
+    loadTopTerms();
     if (!sb) return;
     if (channel) { await sb.removeChannel(channel); channel = null; }
     setLive(false, "verbinde …");
@@ -532,6 +463,7 @@ footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
         if (payload.eventType === "DELETE") { const o = payload.old || {}; if (o.board === board) state.delete(o.cell); }
         else applyRow(payload.new);
         render();
+        if (payload.eventType !== "DELETE") refreshTopTerms();
       })
       .subscribe(status => {
         if (status === "SUBSCRIBED") setLive(true, "live · Board „" + board + "“");

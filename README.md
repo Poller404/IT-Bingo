@@ -1,14 +1,16 @@
-# Synergie-Bingo 3000™
+# Meeting-Bingo
 
-Gemeinsames Buzzword-Bingo für Meetings. Alle tragen Begriffe ins 5×5-Raster ein; fällt einer im Meeting, wird er abgehakt. Kein Wettbewerb, nur gelebte Teamkultur.
+Gemeinsames Bingo für Meetings. Alle tragen Begriffe ins 5×5-Raster ein; fällt einer im Meeting, wird er abgehakt.
 
 - Statische Seite (`index.html`) für GitHub Pages
-- Live-Sync über Supabase (Tabelle `bingo_cells`, Realtime)
+- Live-Sync über Supabase (Realtime)
 - Mehrere Boards über den Link-Anker, z. B. `…/#weekly` oder `…/#sprint-review`
+- „Häufig genutzt“: zeigt automatisch die meistgenutzten Begriffe des Boards
 
-## Supabase-Setup:
+## Supabase-Setup
 
 ```sql
+-- Aktuelles Raster
 create table public.bingo_cells (
   board text not null check (board ~ '^[a-z0-9_-]{1,40}$'),
   cell smallint not null check (cell between 0 and 24 and cell <> 12),
@@ -26,6 +28,25 @@ create policy "bingo delete" on public.bingo_cells for delete to anon, authentic
 grant select, insert, update, delete on table public.bingo_cells to anon, authenticated;
 alter table public.bingo_cells replica identity full;
 alter publication supabase_realtime add table public.bingo_cells;
+
+-- Verlauf für "Häufig genutzt"
+create table public.bingo_term_uses (
+  id bigint generated always as identity primary key,
+  board text not null check (board ~ '^[a-z0-9_-]{1,40}$'),
+  term text not null check (char_length(term) between 1 and 60),
+  created_at timestamptz not null default now()
+);
+create index bingo_term_uses_board_idx on public.bingo_term_uses (board);
+alter table public.bingo_term_uses enable row level security;
+create policy "term uses read"   on public.bingo_term_uses for select to anon, authenticated using (true);
+create policy "term uses insert" on public.bingo_term_uses for insert to anon, authenticated with check (true);
+grant select, insert on table public.bingo_term_uses to anon, authenticated;
+
+create view public.bingo_top_terms with (security_invoker = true) as
+select board, mode() within group (order by term) as term, count(*)::int as uses, max(created_at) as last_used
+from public.bingo_term_uses
+group by board, lower(term);
+grant select on public.bingo_top_terms to anon, authenticated;
 ```
 
 URL und Publishable Key stehen in `index.html` unter `BINGO_CONFIG`. Der Key ist öffentlich gedacht; jede Person mit dem Link kann Boards bearbeiten.
