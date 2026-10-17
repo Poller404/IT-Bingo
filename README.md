@@ -6,7 +6,7 @@ Gemeinsames Buzzword-Bingo für Meetings. Alle tragen Begriffe ins 5×5-Raster e
 - Live-Sync über Supabase (Tabelle `bingo_cells`, Realtime)
 - Mehrere Boards über den Link-Anker, z. B. `…/#weekly` oder `…/#sprint-review`
 
-## Supabase-Setup
+## Supabase-Setup:
 
 ```sql
 create table public.bingo_cells (
