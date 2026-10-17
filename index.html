@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Synergie-Bingo 3000</title>
+<meta name="description" content="Gemeinsames Buzzword-Bingo für Meetings. Kein Wettbewerb, nur gelebte Teamkultur.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='4' fill='%232346d8'/%3E%3Ctext x='16' y='23' font-size='20' text-anchor='middle' fill='%23ffe14d' font-family='Georgia' font-weight='bold'%3EB%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shrikhand&family=Figtree:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: a flipchart sheet — cringe headline on top, 5×5 Post-it grid in the middle, buzzword quick-picks underneath. */
+:root {
+  --bg: #eef1f7;
+  --sheet: #ffffff;
+  --ink: #1b2238;
+  --muted: #5d6680;
+  --line: #d5dbe8;
+  --corp: #2346d8;          /* PowerPoint-Blau */
+  --corp-ink: #ffffff;
+  --note: #fff7c2;          /* Post-it */
+  --note-edge: #eadf8f;
+  --marker: #ff3d7f;        /* Textmarker-Stempel */
+  --marker-soft: rgba(255, 61, 127, .14);
+  --win: #ffe14d;
+  --font-display: "Shrikhand", "Cooper Black", Georgia, serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12162a; --sheet: #1b2038; --ink: #eef0fa; --muted: #a2a9c4; --line: #2e3554;
+    --corp: #7d95ff; --corp-ink: #0d1127; --note: #3a3620; --note-edge: #575027;
+    --marker: #ff6f9e; --marker-soft: rgba(255, 111, 158, .18); --win: #e8c933;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12162a; --sheet: #1b2038; --ink: #eef0fa; --muted: #a2a9c4; --line: #2e3554;
+  --corp: #7d95ff; --corp-ink: #0d1127; --note: #3a3620; --note-edge: #575027;
+  --marker: #ff6f9e; --marker-soft: rgba(255, 111, 158, .18); --win: #e8c933;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); color: var(--ink); }
+body {
+  margin: 0;
+  font-family: var(--font-body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+}
+.wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 22px; }
+
+header { display: flex; flex-direction: column; gap: 8px; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+}
+.eyebrow .live { display: inline-flex; align-items: center; gap: 6px; }
+.eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.eyebrow .live.on .dot { background: #2fbf71; box-shadow: 0 0 0 3px rgba(47,191,113,.2); }
+h1 {
+  font-family: var(--font-display); font-weight: 400; margin: 0;
+  font-size: clamp(34px, 7vw, 58px); line-height: 1.02; text-wrap: balance;
+  color: var(--corp);
+}
+h1 .tm { font-family: var(--font-body); font-size: .32em; vertical-align: super; font-weight: 800; }
+h1 .hl { color: var(--ink); background: linear-gradient(transparent 55%, var(--win) 55%, var(--win) 90%, transparent 90%); padding: 0 .08em; }
+.claim { margin: 0; color: var(--muted); max-width: 60ch; font-size: 16px; }
+.claim b { color: var(--ink); }
+
+.board-card {
+  background: var(--sheet); border: 1px solid var(--line); border-radius: 6px;
+  padding: clamp(10px, 2.5vw, 20px);
+  box-shadow: 0 1px 0 var(--line), 0 18px 40px -28px rgba(20, 30, 70, .45);
+  display: flex; flex-direction: column; gap: 14px;
+}
+.status { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.score { font-weight: 800; font-size: 15px; }
+.score .n { font-variant-numeric: tabular-nums; color: var(--marker); }
+.hint { font-size: 13px; color: var(--muted); }
+
+.grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(5px, 1.4vw, 10px); }
+.cell {
+  position: relative; aspect-ratio: 1; max-width: 100%;
+  border-radius: 4px; border: 1.5px dashed var(--line); background: transparent;
+  display: flex; align-items: center; justify-content: center; text-align: center;
+  padding: 6px; cursor: pointer; color: var(--muted);
+  font: 600 clamp(10px, 2.3vw, 14px)/1.2 var(--font-body);
+  transition: transform .12s ease, background .12s ease;
+  overflow: hidden;
+}
+.cell:hover { border-color: var(--corp); color: var(--corp); }
+.cell:focus-visible { outline: 3px solid var(--corp); outline-offset: 2px; }
+.cell .plus { font-size: 1.6em; font-weight: 400; line-height: 1; }
+.cell.filled {
+  border: 1px solid var(--note-edge); background: var(--note); color: var(--ink);
+  box-shadow: 0 2px 0 var(--note-edge);
+}
+.cell.filled:hover { transform: rotate(-1.2deg) translateY(-1px); }
+.cell .txt { overflow-wrap: anywhere; hyphens: auto; display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
+.cell .by {
+  position: absolute; left: 4px; right: 4px; bottom: 3px;
+  font: 500 clamp(8px, 1.5vw, 10px)/1.1 var(--font-mono); color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.cell .tools { position: absolute; top: 2px; right: 2px; display: flex; gap: 2px; opacity: 0; transition: opacity .12s; }
+.cell:hover .tools, .cell:focus-within .tools { opacity: 1; }
+@media (hover: none) { .cell .tools { opacity: .75; } }
+.tool {
+  width: 20px; height: 20px; border-radius: 3px; border: 0; padding: 0; cursor: pointer;
+  background: var(--sheet); color: var(--ink); font: 600 12px/20px var(--font-body);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.tool:hover { background: var(--corp); color: var(--corp-ink); }
+.tool:focus-visible { outline: 2px solid var(--corp); }
+
+.cell.done .txt { text-decoration: line-through; text-decoration-color: var(--marker); text-decoration-thickness: 2px; }
+.cell.done::after {
+  content: "GESAGT"; position: absolute; inset: auto; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) rotate(-14deg);
+  font: 400 clamp(11px, 2.6vw, 17px)/1 var(--font-display); letter-spacing: .02em;
+  color: var(--marker); border: 2px solid var(--marker); border-radius: 4px;
+  padding: 3px 6px; background: var(--marker-soft); pointer-events: none;
+  animation: stamp .22s ease-out;
+}
+@keyframes stamp { from { transform: translate(-50%, -50%) rotate(-14deg) scale(1.8); opacity: 0; } }
+.cell.inline { outline: 3px solid var(--win); outline-offset: -1px; }
+.cell.free { cursor: default; background: var(--corp); border-color: var(--corp); color: var(--corp-ink); box-shadow: none; }
+.cell.free:hover { transform: none; }
+.cell.free .txt { text-decoration: none; }
+.cell.free::after { content: none; }
+.cell.free .by { color: var(--corp-ink); opacity: .8; }
+
+.cell textarea {
+  position: absolute; inset: 0; width: 100%; height: 100%; resize: none; border: 2px solid var(--corp);
+  border-radius: 4px; background: var(--sheet); color: var(--ink); padding: 6px;
+  font: 600 clamp(10px, 2.3vw, 14px)/1.2 var(--font-body); text-align: center;
+}
+.cell textarea:focus { outline: none; }
+
+.picks { display: flex; flex-direction: column; gap: 10px; }
+.picks h2, .actions h2 {
+  margin: 0; font: 500 12px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted);
+}
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  border: 1px solid var(--line); background: var(--sheet); color: var(--ink); cursor: pointer;
+  border-radius: 999px; padding: 5px 11px; font: 600 13px/1.2 var(--font-body);
+}
+.chip:hover { border-color: var(--corp); color: var(--corp); }
+.chip:focus-visible { outline: 2px solid var(--corp); outline-offset: 1px; }
+.chip.used { opacity: .4; text-decoration: line-through; }
+
+.actions { display: flex; flex-direction: column; gap: 10px; }
+.btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.btn {
+  border: 0; border-radius: 4px; padding: 9px 14px; cursor: pointer;
+  font: 800 14px/1 var(--font-body); background: var(--corp); color: var(--corp-ink);
+}
+.btn.ghost { background: transparent; color: var(--ink); box-shadow: inset 0 0 0 1.5px var(--line); }
+.btn.ghost:hover { box-shadow: inset 0 0 0 1.5px var(--corp); color: var(--corp); }
+.btn.danger { background: var(--marker); color: #fff; }
+.btn:focus-visible { outline: 3px solid var(--win); outline-offset: 2px; }
+.confirm { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; }
+
+.notice { font-size: 13px; color: var(--muted); border-left: 3px solid var(--win); padding: 4px 10px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%) translateY(140%); transition: transform .3s cubic-bezier(.2,1.4,.4,1);
+  background: var(--win); color: #1b2238; border-radius: 6px; padding: 12px 18px;
+  font: 400 clamp(18px, 4vw, 24px)/1.15 var(--font-display); text-align: center;
+  max-width: calc(100vw - 32px); box-shadow: 0 10px 30px -10px rgba(0,0,0,.4); z-index: 5;
+}
+.toast small { display: block; font: 600 13px/1.3 var(--font-body); margin-top: 4px; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+canvas#confetti { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 4; }
+
+.who { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: end; }
+.field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.field label { font: 500 11px/1 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.field input {
+  font: 600 14px/1.2 var(--font-body); color: var(--ink); background: var(--sheet);
+  border: 1.5px solid var(--line); border-radius: 4px; padding: 7px 10px; width: 14em; max-width: 100%;
+}
+.field input:focus-visible { outline: none; border-color: var(--corp); }
+.who .btn { padding: 8px 12px; }
+footer { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+@media (prefers-reduced-motion: reduce) {
+  .cell, .toast { transition: none; }
+  .cell.done::after { animation: none; }
+}
+</style>
+</head>
+<body>
+<canvas id="confetti" aria-hidden="true"></canvas>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">
+      <span>Agenda-Punkt 7b · Teambuilding</span>
+      <span class="live" id="live"><span class="dot"></span><span id="liveText">verbinde …</span></span>
+    </div>
+    <h1>Synergie-Bingo 3000<span class="tm">™</span><br>Lass uns das mal <span class="hl">kurz abholen</span>!</h1>
+    <p class="claim">Kein Wettbewerb, nur <b>gelebte Teamkultur</b>. Alle tragen Buzzwords ins Raster ein. Fällt eins im Meeting, wird's abgehakt. Volle Reihe = gemeinsamer Win-Win-Moment.</p>
+  </header>
+
+  <form class="who" id="whoForm" autocomplete="off">
+    <div class="field">
+      <label for="myName">Dein Name</label>
+      <input id="myName" maxlength="30" placeholder="z. B. Kim aus dem Controlling">
+    </div>
+    <div class="field">
+      <label for="boardName">Board (für dein Team)</label>
+      <input id="boardName" maxlength="40" placeholder="weekly">
+    </div>
+    <button class="btn ghost" type="submit">Board wechseln</button>
+    <button class="btn ghost" type="button" id="copyLink">Link kopieren</button>
+  </form>
+
+  <section class="board-card" aria-label="Bingo-Raster">
+    <div class="status">
+      <div class="score"><span class="n" id="lines">0</span> von 12 Reihen gemeinsam abgeholt · <span class="n" id="said">0</span> Begriffe gesagt</div>
+      <div class="hint">Leeres Feld antippen = eintragen · Volles Feld antippen = abhaken</div>
+    </div>
+    <div class="grid" id="grid" role="grid"></div>
+  </section>
+
+  <section class="picks">
+    <h2>Fehlt dir Inspiration? Ein Klick füllt das nächste freie Feld</h2>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="actions">
+    <h2>Neues Meeting, neues Glück</h2>
+    <div class="btns" id="actionBtns">
+      <button class="btn" id="randomFill" type="button">Restliche Felder zufällig füllen</button>
+      <button class="btn ghost" id="resetChecks" type="button">Häkchen zurücksetzen</button>
+      <button class="btn ghost" id="clearAll" type="button">Raster leeren</button>
+    </div>
+    <div class="confirm" id="confirm" hidden>
+      <span id="confirmText"></span>
+      <button class="btn danger" id="confirmYes" type="button">Ja, machen</button>
+      <button class="btn ghost" id="confirmNo" type="button">Doch nicht</button>
+    </div>
+    <p class="notice" id="notice" hidden></p>
+  </section>
+
+  <footer>Mitte ist Freifeld, weil's sowieso jedes Mal passiert.</footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.4/dist/umd/supabase.js"></script>
+<script>
+  // Öffentlicher Publishable Key: darf im Browser stehen, Zugriff regelt Row Level Security.
+  window.BINGO_CONFIG = {
+    url: "https://kxrnwdzxypfepnaafdfn.supabase.co",
+    key: "sb_publishable_MnMq0DnmXk35gplnmPMhYA_7UJ1YE-8",
+    table: "bingo_cells"
+  };
+</script>
+<script>
+(() => {
+  const SIZE = 5, CENTER = 12;
+  const FREE_TEXT = "„Du bist noch gemutet“";
+  const BUZZ = [
+    "Synergie", "Kurz abholen", "Low hanging fruit", "Können wir das offline klären?",
+    "Am Ende des Tages", "Win-Win", "Proaktiv", "Deep Dive", "Pain Point", "Agil",
+    "Keine Bandbreite", "Learnings", "Quick Win", "Auf Augenhöhe", "ASAP", "Touchpoint",
+    "Mindset", "Commitment", "Roadmap", "Stakeholder", "KPI", "Seht ihr meinen Bildschirm?",
+    "Das nehmen wir mit", "Lass uns da nochmal drüber sprechen", "Out of the box",
+    "Ich teile kurz", "Spannend!", "Hands-on", "Game Changer", "Ownership", "Big Picture",
+    "Sorry, du warst kurz eingefroren", "Ich muss gleich in den nächsten Call", "Zeitlich knapp"
+  ];
+  const LINES = [];
+  for (let r = 0; r < SIZE; r++) LINES.push([0,1,2,3,4].map(c => r * SIZE + c));
+  for (let c = 0; c < SIZE; c++) LINES.push([0,1,2,3,4].map(r => r * SIZE + c));
+  LINES.push([0,6,12,18,24], [4,8,12,16,20]);
+
+  const $ = id => document.getElementById(id);
+  const grid = $("grid"), chips = $("chips");
+  const idOf = i => "c" + String(i).padStart(2, "0");
+
+  // state: index -> {text, done, by}
+  const state = new Map();
+  const CFG = window.BINGO_CONFIG || {};
+  let sb = null, channel = null;
+  let editing = -1, editor = null;
+  let lastLines = null;
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch {} }
+  };
+  const cleanBoard = s => (s || "").toLowerCase().trim().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+  let board = cleanBoard(decodeURIComponent(location.hash.slice(1))) || "weekly";
+  const myName = () => $("myName").value.trim().slice(0, 30) || null;
+
+  // ---------- writes (Supabase or local fallback) ----------
+  async function writeCell(i, data) {
+    if (data === null) state.delete(i); else state.set(i, data);
+    render();
+    if (!sb) return;
+    const q = sb.from(CFG.table);
+    const { error } = data === null
+      ? await q.delete().eq("board", board).eq("cell", i)
+      : await q.upsert({ board, cell: i, text: data.text, done: data.done, added_by: data.by, updated_at: new Date().toISOString() });
+    if (error) showNotice("Speichern hat nicht geklappt (" + error.message + "). Bitte nochmal versuchen.");
+  }
+
+  // ---------- render ----------
+  function render() {
+    const doneSet = new Set([CENTER]);
+    let said = 0;
+    state.forEach((v, i) => { if (v.text && v.done) { doneSet.add(i); said++; } });
+    const done = LINES.filter(l => l.every(i => doneSet.has(i)));
+    const inLine = new Set(done.flat());
+
+    for (let i = 0; i < SIZE * SIZE; i++) {
+      let el = grid.children[i];
+      if (!el) { el = document.createElement("div"); el.className = "cell"; el.dataset.i = i; el.tabIndex = 0; grid.appendChild(el); }
+      if (i === editing) continue;
+      el.replaceChildren();
+      el.className = "cell";
+      if (i === CENTER) {
+        el.classList.add("filled", "free", "done");
+        el.tabIndex = -1;
+        if (inLine.has(i)) el.classList.add("inline");
+        const t = document.createElement("span"); t.className = "txt"; t.textContent = FREE_TEXT; el.append(t);
+        const b = document.createElement("span"); b.className = "by"; b.textContent = "Freifeld"; el.append(b);
+        el.setAttribute("aria-label", "Freifeld: " + FREE_TEXT);
+        continue;
+      }
+      el.tabIndex = 0;
+      const v = state.get(i);
+      if (!v || !v.text) {
+        const p = document.createElement("span"); p.className = "plus"; p.textContent = "+"; el.append(p);
+        el.setAttribute("aria-label", "Leeres Feld, Begriff eintragen");
+        continue;
+      }
+      el.classList.add("filled");
+      if (v.done) el.classList.add("done");
+      if (inLine.has(i)) el.classList.add("inline");
+      const t = document.createElement("span"); t.className = "txt"; t.textContent = v.text; el.append(t);
+      if (v.by) { const b = document.createElement("span"); b.className = "by"; b.textContent = "von " + v.by; el.append(b); }
+      const tools = document.createElement("div"); tools.className = "tools";
+      tools.append(mkTool("✎", "Bearbeiten", "edit"), mkTool("×", "Feld leeren", "clear"));
+      el.append(tools);
+      el.setAttribute("aria-label", v.text + (v.done ? ", gesagt" : ", noch nicht gesagt") + ". Antippen zum " + (v.done ? "Zurücknehmen" : "Abhaken"));
+    }
+
+    $("lines").textContent = done.length;
+    $("said").textContent = said;
+    const used = new Set([...state.values()].map(v => (v.text || "").toLowerCase()));
+    [...chips.children].forEach(c => c.classList.toggle("used", used.has(c.textContent.toLowerCase())));
+
+    if (lastLines !== null && done.length > lastLines) celebrate(done.length);
+    lastLines = done.length;
+  }
+
+  function mkTool(label, title, act) {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tool"; b.textContent = label; b.title = title;
+    b.setAttribute("aria-label", title); b.dataset.act = act;
+    return b;
+  }
+
+  // ---------- editing ----------
+  function startEdit(i) {
+    if (i === CENTER) return;
+    if (editing !== -1) finishEdit(true);
+    editing = i;
+    const el = grid.children[i];
+    el.replaceChildren();
+    editor = document.createElement("textarea");
+    editor.id = "edit-" + i;
+    editor.maxLength = 60;
+    editor.placeholder = "Buzzword …";
+    editor.setAttribute("aria-label", "Begriff eingeben");
+    editor.value = (state.get(i) || {}).text || "";
+    editor.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); finishEdit(true); }
+      if (e.key === "Escape") { e.preventDefault(); finishEdit(false); }
+    });
+    editor.addEventListener("blur", () => finishEdit(true));
+    el.append(editor);
+    editor.focus();
+  }
+  function finishEdit(save) {
+    if (editing === -1) return;
+    const i = editing, val = editor.value.trim().replace(/\s+/g, " ");
+    editing = -1; editor = null;
+    const prev = state.get(i);
+    if (save && val && (!prev || prev.text !== val)) {
+      writeCell(i, { text: val, done: false, by: myName() || (prev && prev.by) || null });
+    } else render();
+  }
+
+  grid.addEventListener("click", e => {
+    const cell = e.target.closest(".cell"); if (!cell) return;
+    const i = +cell.dataset.i;
+    if (i === editing || i === CENTER) return;
+    const tool = e.target.closest(".tool");
+    const v = state.get(i);
+    if (tool) {
+      e.stopPropagation();
+      if (tool.dataset.act === "edit") startEdit(i);
+      else writeCell(i, null);
+      return;
+    }
+    if (!v || !v.text) startEdit(i);
+    else writeCell(i, { ...v, done: !v.done });
+  });
+  grid.addEventListener("keydown", e => {
+    if (e.target.tagName === "TEXTAREA" || e.target.tagName === "BUTTON") return;
+    const cell = e.target.closest(".cell"); if (!cell) return;
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); cell.click(); }
+  });
+
+  // ---------- quick picks ----------
+  BUZZ.forEach(w => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = w;
+    chips.append(b);
+  });
+  function emptyCells() { const out = []; for (let i = 0; i < 25; i++) if (i !== CENTER && !(state.get(i) || {}).text) out.push(i); return out; }
+  chips.addEventListener("click", e => {
+    const b = e.target.closest(".chip"); if (!b || b.classList.contains("used")) return;
+    const free = emptyCells();
+    if (!free.length) { showNotice("Das Raster ist voll. Erst ein Feld leeren (×), dann klappt's."); return; }
+    writeCell(free[0], { text: b.textContent, done: false, by: myName() });
+  });
+  $("randomFill").addEventListener("click", async () => {
+    const free = emptyCells();
+    const used = new Set([...state.values()].map(v => (v.text || "").toLowerCase()));
+    const pool = BUZZ.filter(w => !used.has(w.toLowerCase())).sort(() => Math.random() - .5);
+    for (const i of free) { const w = pool.pop(); if (!w) break; await writeCell(i, { text: w, done: false, by: myName() }); }
+  });
+
+  // ---------- reset with in-page confirm ----------
+  let pending = null;
+  function ask(text, fn) { pending = fn; $("confirmText").textContent = text; $("confirm").hidden = false; $("actionBtns").hidden = true; $("confirmYes").focus(); }
+  function closeAsk() { pending = null; $("confirm").hidden = true; $("actionBtns").hidden = false; }
+  $("confirmNo").addEventListener("click", closeAsk);
+  $("confirmYes").addEventListener("click", async () => { const fn = pending; closeAsk(); if (fn) await fn(); });
+  $("resetChecks").addEventListener("click", () => ask("Alle Häkchen entfernen? Die Begriffe bleiben.", async () => {
+    state.forEach(v => { v.done = false; });
+    lastLines = null; render();
+    if (sb) { const { error } = await sb.from(CFG.table).update({ done: false }).eq("board", board).eq("done", true); if (error) showNotice("Zurücksetzen hat nicht geklappt: " + error.message); }
+  }));
+  $("clearAll").addEventListener("click", () => ask("Wirklich alle Begriffe für alle löschen?", async () => {
+    state.clear(); lastLines = null; render();
+    if (sb) { const { error } = await sb.from(CFG.table).delete().eq("board", board); if (error) showNotice("Leeren hat nicht geklappt: " + error.message); }
+  }));
+
+  // ---------- celebration ----------
+  const PHRASES = [
+    ["BINGO!", "Wir haben die Reihe gemeinsam abgeholt."],
+    ["BINGO!", "Das ist gelebte Synergie, Leute."],
+    ["BINGO!", "Great Teamwork. Ich nehme das mal als Learning mit."],
+    ["BINGO!", "Low hanging fruit: gepflückt."]
+  ];
+  let toastTimer;
+  function celebrate(n) {
+    const [a, b] = PHRASES[(n - 1) % PHRASES.length];
+    const t = $("toast"); t.replaceChildren(document.createTextNode(a + (n > 1 ? " ×" + n : "")));
+    const s = document.createElement("small"); s.textContent = b; t.append(s);
+    t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+    confetti();
+  }
+  function confetti() {
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const cv = $("confetti"), ctx = cv.getContext("2d");
+    const dpr = window.devicePixelRatio || 1;
+    cv.width = innerWidth * dpr; cv.height = innerHeight * dpr; ctx.scale(dpr, dpr);
+    const cs = getComputedStyle(document.documentElement);
+    const cols = ["--corp", "--marker", "--win", "--note"].map(v => cs.getPropertyValue(v).trim());
+    const ps = Array.from({ length: 140 }, () => ({
+      x: innerWidth / 2 + (Math.random() - .5) * 120, y: innerHeight * .55,
+      vx: (Math.random() - .5) * 14, vy: -Math.random() * 15 - 6, r: Math.random() * 6.28,
+      vr: (Math.random() - .5) * .4, w: 6 + Math.random() * 6, h: 4 + Math.random() * 4, c: cols[Math.random() * 4 | 0]
+    }));
+    let f = 0;
+    (function tick() {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      ps.forEach(p => { p.vy += .45; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h); ctx.restore(); });
+      if (++f < 150) requestAnimationFrame(tick); else ctx.clearRect(0, 0, innerWidth, innerHeight);
+    })();
+  }
+
+  function showNotice(msg) { const n = $("notice"); n.textContent = msg; n.hidden = false; }
+  function setLive(on, text) { $("live").classList.toggle("on", on); $("liveText").textContent = text; }
+
+  // ---------- board & name ----------
+  $("myName").value = store.get("bingo-name") || "";
+  $("myName").addEventListener("change", () => store.set("bingo-name", $("myName").value.trim()));
+  $("whoForm").addEventListener("submit", e => {
+    e.preventDefault();
+    const b = cleanBoard($("boardName").value) || "weekly";
+    if (b !== board) location.hash = b; else connect();
+  });
+  window.addEventListener("hashchange", () => { board = cleanBoard(decodeURIComponent(location.hash.slice(1))) || "weekly"; connect(); });
+  $("copyLink").addEventListener("click", async () => {
+    const url = location.href.split("#")[0] + "#" + board;
+    try { await navigator.clipboard.writeText(url); $("copyLink").textContent = "Kopiert!"; }
+    catch { showNotice("Link zum Teilen: " + url); }
+    setTimeout(() => { $("copyLink").textContent = "Link kopieren"; }, 1800);
+  });
+
+  // ---------- boot ----------
+  function applyRow(r) {
+    if (!r || r.board !== board) return;
+    const i = r.cell;
+    if (!Number.isInteger(i) || i < 0 || i > 24 || i === CENTER) return;
+    state.set(i, { text: String(r.text).slice(0, 60), done: !!r.done, by: r.added_by || null });
+  }
+  async function connect() {
+    $("boardName").value = board;
+    document.title = "Synergie-Bingo 3000 · " + board;
+    state.clear(); lastLines = null; render();
+    if (!sb) return;
+    if (channel) { await sb.removeChannel(channel); channel = null; }
+    setLive(false, "verbinde …");
+    const { data, error } = await sb.from(CFG.table).select("*").eq("board", board);
+    if (error) { setLive(false, "offline"); showNotice("Board konnte nicht geladen werden: " + error.message); return; }
+    state.clear(); data.forEach(applyRow); lastLines = null; render();
+    channel = sb.channel("bingo-" + board)
+      .on("postgres_changes", { event: "*", schema: "public", table: CFG.table, filter: "board=eq." + board }, payload => {
+        if (payload.eventType === "DELETE") { const o = payload.old || {}; if (o.board === board) state.delete(o.cell); }
+        else applyRow(payload.new);
+        render();
+      })
+      .subscribe(status => {
+        if (status === "SUBSCRIBED") setLive(true, "live · Board „" + board + "“");
+        else if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") setLive(false, "Live-Verbindung weg");
+      });
+  }
+
+  render();
+  if (window.supabase && CFG.url && CFG.key) {
+    sb = window.supabase.createClient(CFG.url, CFG.key);
+  } else {
+    setLive(false, "nur lokal");
+    showNotice("Keine Verbindung zur Datenbank. Du kannst lokal spielen; andere sehen deine Einträge nicht.");
+  }
+  connect();
+})();
+</script>
+</body>
+</html>
