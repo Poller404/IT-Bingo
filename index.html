@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>IT-Bingo</title>
-<meta name="description" content="Gemeinsames Bingo für Meetings: Begriffe eintragen, abhaken, wenn sie fallen.">
+<meta name="description" content="Gemeinsames Bingo für die IT: Begriffe eintragen, abhaken, wenn sie fallen.">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23156f63'/%3E%3Cpath d='M9 16.5l4.5 4.5L23 11.5' stroke='white' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -152,7 +152,7 @@ h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-
 <div class="wrap">
   <header>
     <div class="top">
-      <h1>Meeting-Bingo</h1>
+      <h1>IT-Bingo</h1>
       <span class="live" id="live"><span class="dot"></span><span id="liveText">verbinde …</span></span>
     </div>
     <p class="claim">Alle tragen Begriffe ins Raster ein. Fällt einer im Meeting, wird er abgehakt.</p>
@@ -449,7 +449,7 @@ h1 { margin: 0; font-size: 28px; font-weight: 600; letter-spacing: -.02em; line-
   }
   async function connect() {
     $("boardName").value = board;
-    document.title = "Meeting-Bingo · " + board;
+    document.title = "IT-Bingo · " + board;
     state.clear(); topTerms = []; lastLines = null; render();
     loadTopTerms();
     if (!sb) return;

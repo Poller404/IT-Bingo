@@ -1,6 +1,6 @@
-# Meeting-Bingo
+# IT-Bingo
 
-Gemeinsames Bingo für Meetings. Alle tragen Begriffe ins 5×5-Raster ein; fällt einer im Meeting, wird er abgehakt.
+Gemeinsames Bingo für die IT. Alle tragen Begriffe ins 5×5-Raster ein; fällt einer im Meeting, wird er abgehakt.
 
 - Statische Seite (`index.html`) für GitHub Pages
 - Live-Sync über Supabase (Realtime)
